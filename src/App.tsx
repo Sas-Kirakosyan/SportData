@@ -1,56 +1,62 @@
-import React from 'react';
-import logo from './logo.svg';
-import { Counter } from './features/counter/Counter';
-import './App.css';
+import React, { useEffect, useState, useCallback, useRef } from "react";
+import useWebSocket, { ReadyState } from "react-use-websocket";
+
+import "./App.css";
+import View from "./components/View";
+import { arr } from "./constants/arr";
+// import io from "socket.io-client";
+
+// const socket = io("wss://mob.blue-version.com/hub/ws-sport");
+import { initData, subscribeData, pingData } from "./constants/socketData";
+const URL_WEB_SOCKET = "wss://mob.blue-version.com/hub/ws-sport";
 
 function App() {
+  const [ws, setWs] = useState<WebSocket>(new WebSocket(URL_WEB_SOCKET));
+  const wsRef = useRef<any>({});
+
+  const timeerId = 0;
+
+  useEffect(() => {
+    wsRef.current = new WebSocket(URL_WEB_SOCKET);
+
+    wsRef.current.onopen = () => {
+      setWs(wsRef.current);
+      wsRef.current.send(JSON.stringify(initData));
+    };
+
+    setInterval(() => {
+      wsRef.current.send(JSON.stringify(pingData));
+    }, 10000);
+
+    wsRef.current.onclose = () => console.log("ws closed");
+
+    return () => {
+      clearInterval(timeerId);
+      wsRef.current.close();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (ws) {
+      ws.onmessage = (evt) => {
+        const evtData: any = JSON.parse(evt.data);
+
+        if (evtData?.data?.session) {
+          console.log("suscribe");
+          wsRef.current.send(JSON.stringify(subscribeData));
+        }
+        console.log("evn", JSON.parse(evt.data));
+      };
+    }
+  }, [ws]);
+
+  // console.log("connectionStatus", connectionStatus);
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <Counter />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <span>
-          <span>Learn </span>
-          <a
-            className="App-link"
-            href="https://reactjs.org/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            React
-          </a>
-          <span>, </span>
-          <a
-            className="App-link"
-            href="https://redux.js.org/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Redux
-          </a>
-          <span>, </span>
-          <a
-            className="App-link"
-            href="https://redux-toolkit.js.org/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Redux Toolkit
-          </a>
-          ,<span> and </span>
-          <a
-            className="App-link"
-            href="https://react-redux.js.org/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            React Redux
-          </a>
-        </span>
-      </header>
+      <View lists={arr} />
+      {/* <p>Connected: {"" + isConnected}</p>
+      <p>Last pong: {lastPong || "-"}</p> */}
+      {/* <button onClick={() => sendJsonMessage(obj, false)}>Send ping</button> */}
     </div>
   );
 }
