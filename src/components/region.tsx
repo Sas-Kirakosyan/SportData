@@ -2,18 +2,20 @@ import React, { useState } from "react";
 import Tournament from "./tournament";
 import ExpandIcon from "./expandIcon";
 
-function takeId(data: {[key: string]: any[]}): string {
+function takeId(data: { [key: string]: any[] }): string {
   return Object.keys(data)[0];
 }
 
-type RegionProps ={
+type RegionProps = {
   name: string;
-   data: any;
-}
+  data: any;
+};
 
-export default function Region({ name = "region", data }: RegionProps): JSX.Element {
+export default function Region({
+  name = "region",
+  data,
+}: RegionProps): JSX.Element {
   const [isOpen, setIsOpen] = useState<IsOpen>({});
-
 
   const handleClick = () => {
     setIsOpen({
@@ -23,7 +25,7 @@ export default function Region({ name = "region", data }: RegionProps): JSX.Elem
   };
 
   return (
-    <h3 style={{ color: "green", marginLeft: "5%" }}>
+    <div style={{ color: "green", marginLeft: "5%", fontSize: "25px" }}>
       <div>
         <ExpandIcon _onClick={handleClick} isOpen={isOpen[takeId(data)]} />
         region: {name}
@@ -36,6 +38,6 @@ export default function Region({ name = "region", data }: RegionProps): JSX.Elem
             data={region.children}
           />
         ))}
-    </h3>
+    </div>
   );
 }

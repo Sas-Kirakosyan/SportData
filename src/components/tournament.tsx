@@ -5,10 +5,13 @@ import { takeId } from "utils/helpers";
 
 type TournamentProps = {
   name: string;
-  data: any
-}
+  data: any;
+};
 
-export default function Tournament({ name = "tournament", data }:TournamentProps ): JSX.Element {
+export default function Tournament({
+  name = "tournament",
+  data,
+}: TournamentProps): JSX.Element {
   const [isOpen, setIsOpen] = useState<IsOpen>({});
 
   const handleClick = () => {
@@ -24,7 +27,10 @@ export default function Tournament({ name = "tournament", data }:TournamentProps
         <ExpandIcon _onClick={handleClick} isOpen={isOpen[takeId(data)]} />
         Tournament: {name}
       </div>
-      {isOpen[takeId(data)] && data.map((el: {name: string, data: any}) => <Game data={el} />)}
+      {isOpen[takeId(data)] &&
+        data.map((el: { name: string; data: any }) => (
+          <Game key={el.name} data={el} />
+        ))}
     </h4>
   );
 }
